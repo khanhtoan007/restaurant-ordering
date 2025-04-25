@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Table {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  qrToken    String   @unique
+  capacity   Int
+  isOccupied Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  orders     Order[]
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  image       String?
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  items       MenuItem[]
+}
+
+model MenuItem {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String?
+  price       Decimal
+  categoryId  String
+  image       String?
+  inStock     Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  category    Category    @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  status    OrderStatus @default(PENDING)
+  tableId   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  invoice   Invoice?
+  table     Table       @relation(fields: [tableId], references: [id])
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id         String          @id @default(uuid())
+  orderId    String
+  menuItemId String
+  quantity   Int
+  notes      String?
+  status     OrderItemStatus @default(PENDING)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  menuItem   MenuItem        @relation(fields: [menuItemId], references: [id])
+  order      Order           @relation(fields: [orderId], references: [id])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(SERVICER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  total     Decimal
+  isPaid    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+}
+
+enum OrderItemStatus {
+  PENDING
+  PREPARING
+  SERVED
+}
+
+enum UserRole {
+  SERVICER
+  ADMIN
+}
