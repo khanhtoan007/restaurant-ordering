@@ -45,6 +45,7 @@ model MenuItem {
 
 model Order {
   id        String      @id @default(uuid())
+  name      String?
   status    OrderStatus @default(PENDING)
   tableId   String
   createdAt DateTime    @default(now())
