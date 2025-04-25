@@ -129,5 +129,4 @@ npm install axios react-router-dom
 
 ---
 
-## ✍️ Author: Generated with ❤️ by ChatGPT
 
